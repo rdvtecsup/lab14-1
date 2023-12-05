@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Carga de archivos</title>
+
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #f4f4f4;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+    }
+
+    main {
+      background-color: #fff;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      max-width: 600px;
+      width: 100%;
+      box-sizing: border-box;
+    }
+
+    h1 {
+      color: #333;
+      text-align: center;
+    }
+
+    form {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    input[type="file"] {
+      margin: 10px 0;
+    }
+
+    input[type="submit"] {
+      background-color: #4caf50;
+      color: white;
+      padding: 10px 15px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+
+    input[type="submit"]:hover {
+      background-color: #45a049;
+    }
+
+    #file-info {
+      margin-top: 20px;
+    }
+
+    p.error {
+      color: red;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>Carga de archivos</h1>
+    <form action="/upload" method="POST" enctype="multipart/form-data">
+      <input type="file" name="files" multiple />
+      <input type="submit" value="Cargar" />
+    </form>
+
+    <div id="file-info"></div>
+  </main>
+
+  <script>
+    const form = document.querySelector('form');
+    const fileInfoDiv = document.querySelector('#file-info');
+
+    form.addEventListener('submit', async (event) => {
+      event.preventDefault();
+
+      const formData = new FormData(form);
+      const response = await fetch('/upload', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (response.ok) {
+        const fileDetails = await response.json();
+        fileInfoDiv.innerHTML = fileDetails
+          .map(
+            (file) => `
+            <div class="file-details">
+              <p><strong>Nombre:</strong> ${file.filename}</p>
+              <p><strong>Nombre original:</strong> ${file.originalname}</p>
+              <p><strong>Tamaño:</strong> ${file.size} bytes</p>
+              <p><strong>Tipo MIME:</strong> ${file.mimetype}</p>
+            </div>
+            <hr />
+          `
+          )
+          .join('');
+      } else {
+        fileInfoDiv.innerHTML = `<p class="error">Error al cargar el archivo: ${response.statusText}</p>`;
+      }
+    });
+  </script>
+</body>
+</html>
